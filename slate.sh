@@ -1,6 +1,6 @@
 #!/bin/sh
 
-touch_check(){
+touch_check() {
 	if [ -e "$1" ]; then
 		echo "error: file exists $1"
 	else
@@ -12,16 +12,16 @@ write_check() {
 	if [ -e "$1" ]; then
 		echo "error: file exists $1"
 	else
-		echo "$2" > "$1"
+		echo "$2" >"$1"
 	fi
 }
 
 makefile() {
 	write_check "makefile" \
-"all: $NAME
+		"all: $NAME
 
-$NAME: $NAME.*
-	gcc -o $NAME $NAME.c -Wall
+$NAME: *.c *.h
+	gcc -o $NAME *.c -Wall
 
 run: all
 	./$NAME
@@ -38,12 +38,12 @@ c_file() {
 	fi
 
 	echo \
-"int main(int argc, char *argv[]) {
+		"int main(int argc, char *argv[]) {
 	 return 0;
-}" >> "$NAME.c" 
+}" >>"$NAME.c"
 }
 
-safe_rm() {	
+safe_rm() {
 	if [ -e "$1" ]; then
 		cp --backup=t "$1" "/tmp/$1"
 		rm "$1"
@@ -51,39 +51,37 @@ safe_rm() {
 }
 
 C=
-
 NAME=$1
 shift
 
-while [ $# -gt 0 ]
-do
+while [ $# -gt 0 ]; do
 	arg=$1
 	shift
 	case $arg in
-		-h|--help)
-			echo 'usage: ./cproj.sh NAME -c'
-			echo '-c, --noheader :: just make a .c file (no .h)'
-			echo '-n, --new :: safely deletes .c, .h and makefile, storing backups in /tmp/'
-			echo '--delete :: deletes .c, .h and makefile'
-			echo '-h, --help :: shows this screen'
-			;;
-		-c|--noheader)
-			C=1
-			;;
-		-n|--new)
-			safe_rm "$NAME.c"
-			safe_rm "$NAME.h"
-			safe_rm "makefile"
-			;;
-		--delete)
-			rm "$NAME.c"
-			rm "$NAME.h"
-			rm "makefile"
-			exit
-			;;
-		*)
-			echo "unknown flag, $arg"
-			;;
+	-h | --help)
+		echo 'usage: ./slate.sh NAME -c'
+		echo '-c, --noheader :: just make a .c file (no .h)'
+		echo '-n, --new :: safely deletes .c, .h and makefile, storing backups in /tmp/'
+		echo '--delete :: deletes .c, .h and makefile'
+		echo '-h, --help :: shows this screen'
+		;;
+	-c | --noheader)
+		C=1
+		;;
+	-n | --new)
+		safe_rm "$NAME.c"
+		safe_rm "$NAME.h"
+		safe_rm "makefile"
+		;;
+	--delete)
+		rm "$NAME.c"
+		rm "$NAME.h"
+		rm "makefile"
+		exit
+		;;
+	*)
+		echo "unknown flag, $arg"
+		;;
 	esac
 done
 
@@ -95,5 +93,3 @@ if [ -z "$C" ]; then
 else
 	c_file 0
 fi
-
-
